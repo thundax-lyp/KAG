@@ -161,7 +161,7 @@ def convert_to_subgraph(
             table_id = f"{node_id}_table_{i}"
             table_node = Node(
                 _id=table_id,
-                name=f"Table {i+1}",
+                name=f"Table {i + 1}",
                 label="Table",
                 properties={
                     "headers": ",".join(table["headers"]),
@@ -605,7 +605,7 @@ class MarkDownReader(ReaderABC):
         def _collect_children_content(n: MarkdownNode):
             """Collect content from node and its children recursively."""
             content = []
-            if n.content:
+            if n.content or n.title:
                 content.append(n.content)
             for child in n.children:
                 content.extend(_collect_children_content(child))
@@ -714,15 +714,17 @@ class MarkDownReader(ReaderABC):
         current_contents = parent_contents + ([node.content] if node.content else [])
         has_target_level = False
 
+        current_id = None
+
         # Create chunk for current node if it has content
         if node.content and node.title != "root":
             full_title = " / ".join(current_titles)
+            current_id = generate_hash_id(full_title)
             parent_content = (
                 "\n".join(filter(None, parent_contents)) if parent_contents else None
             )
-
             current_chunk = Chunk(
-                id=generate_hash_id(full_title),
+                id=current_id,
                 parent_id=parent_id,
                 name=full_title,
                 content=node.content,
@@ -734,7 +736,7 @@ class MarkDownReader(ReaderABC):
         # Process children
         for child in node.children:
             child_outputs, child_map = self._convert_to_outputs(
-                child, id, parent_id, current_titles, current_contents
+                child, id, current_id, current_titles, current_contents
             )
             if child_outputs:
                 has_target_level = True
@@ -782,9 +784,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(node.tables):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
                     parent_id=parent_chunk_id,
-                    name=f"{full_title} / Table {i+1}",
+                    name=f"{full_title} / Table {i + 1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
@@ -800,9 +802,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(child_tables, start=len(all_tables)):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
                     parent_id=parent_chunk_id,
-                    name=f"{full_title} / Table {i+1}",
+                    name=f"{full_title} / Table {i + 1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
@@ -853,9 +855,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(node.tables):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
                     parent_id=main_chunk.id,
-                    name=f"{full_title} / Table {i+1}",
+                    name=f"{full_title} / Table {i + 1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
