@@ -605,7 +605,7 @@ class MarkDownReader(ReaderABC):
         def _collect_children_content(n: MarkdownNode):
             """Collect content from node and its children recursively."""
             content = []
-            if n.content or n.title:
+            if n.content:
                 content.append(n.content)
             for child in n.children:
                 content.extend(_collect_children_content(child))
