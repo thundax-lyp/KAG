@@ -161,7 +161,7 @@ def convert_to_subgraph(
             table_id = f"{node_id}_table_{i}"
             table_node = Node(
                 _id=table_id,
-                name=f"Table {i + 1}",
+                name=f"Table {i+1}",
                 label="Table",
                 properties={
                     "headers": ",".join(table["headers"]),
@@ -784,9 +784,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(node.tables):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
                     parent_id=parent_chunk_id,
-                    name=f"{full_title} / Table {i + 1}",
+                    name=f"{full_title} / Table {i+1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
@@ -802,9 +802,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(child_tables, start=len(all_tables)):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
                     parent_id=parent_chunk_id,
-                    name=f"{full_title} / Table {i + 1}",
+                    name=f"{full_title} / Table {i+1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
@@ -855,9 +855,9 @@ class MarkDownReader(ReaderABC):
             for i, table in enumerate(node.tables):
                 table_content = convert_table_func(table["headers"], table["data"])
                 table_chunk = Chunk(
-                    id=generate_hash_id(f"{full_title} / Table {i + 1}"),
+                    id=generate_hash_id(f"{full_title} / Table {i+1}"),
                     parent_id=main_chunk.id,
-                    name=f"{full_title} / Table {i + 1}",
+                    name=f"{full_title} / Table {i+1}",
                     content=table_content,
                     type=ChunkTypeEnum.Table,
                     before_text=table.get("context", {}).get("before_text", ""),
