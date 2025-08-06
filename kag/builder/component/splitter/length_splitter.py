@@ -79,6 +79,7 @@ class LengthSplitter(BaseTableSplitter):
     def split_sentence(self, content):
         """
         Splits the given content into sentences based on delimiters.
+        Also enforces a hard length limit of 2 * split_length.
 
         Args:
             content (str): The content to be split into sentences.
@@ -87,21 +88,56 @@ class LengthSplitter(BaseTableSplitter):
             List[str]: A list of sentences.
         """
         sentence_delimiters = (
-            ".。？?！!" if self.kag_project_config.language == "en" else "。？！"
+            ".。？?！!\n" if self.kag_project_config.language == "en" else "。？！\n"
         )
+        max_length = self.split_length * 2
         output = []
         start = 0
+
         for idx, char in enumerate(content):
             if char in sentence_delimiters:
                 end = idx
                 tmp = content[start : end + 1].strip()
                 if len(tmp) > 0:
-                    output.append(tmp.strip())
+                    # 如果句子超过最大长度限制，强制切分
+                    if len(tmp) > max_length:
+                        output.extend(self._force_split_by_length(tmp, max_length))
+                    else:
+                        output.append(tmp.strip())
                 start = idx + 1
+            elif idx - start >= max_length:
+                # 当前片段已经达到最大长度，强制切分
+                tmp = content[start:idx].strip()
+                if len(tmp) > 0:
+                    output.extend(self._force_split_by_length(tmp, max_length))
+                start = idx
+
         res = content[start:].strip()
         if len(res) > 0:
-            output.append(res)
+            # 如果剩余部分超过最大长度限制，强制切分
+            if len(res) > max_length:
+                output.extend(self._force_split_by_length(res, max_length))
+            else:
+                output.append(res)
         return output
+
+    def _force_split_by_length(self, text, max_length):
+        """
+        强制按长度切分文本，不考虑分隔符
+
+        Args:
+            text (str): 要切分的文本
+            max_length (int): 最大长度
+
+        Returns:
+            List[str]: 切分后的文本片段列表
+        """
+        result = []
+        for i in range(0, len(text), max_length):
+            chunk = text[i : i + max_length].strip()
+            if chunk:
+                result.append(chunk)
+        return result
 
     def slide_window_chunk(
         self,
